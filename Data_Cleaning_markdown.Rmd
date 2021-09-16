@@ -1,0 +1,61 @@
+---
+title: "Data Cleaning"
+author: "Vish"
+date: "16/09/2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(data.table)
+```
+
+
+```{r}
+data_import <- read.csv("data_cleaning_challenge.csv")
+```
+
+```{r}
+data_nonull <- data_import %>%
+  select(-c(X,X.1)) %>% 
+  filter(Row.Type !="")
+```
+
+```{r}
+data_iter <- data_nonull
+```
+
+```{r}
+x <- 0
+for(i in 1:nrow(data_iter)){
+   if(data_iter$Row.Type[i] %like% 'first name'){
+     x <- x + 1
+   }
+   data_iter$Iteration[i] <- x
+}
+```
+
+
+```{r}
+data_left <- data_iter %>%
+  select(c(1:3,Iteration)) %>% 
+  filter(Row.Type %like% 'first name') %>% 
+  rename('First Name' = Row.Type,
+         'Last Name' = Iter.Number,
+         'Date' = Power1)
+```
+
+
+```{r}
+data_right<- data_iter %>%
+  filter(!str_detect(Row.Type, 'first name')) %>% 
+  filter(Row.Type != "Row Type")
+```
+
+```{r}
+data_final <- left_join(data_left, data_right, 
+                        by ="Iteration")
+```
+
